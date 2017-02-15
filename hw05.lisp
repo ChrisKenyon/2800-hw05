@@ -132,35 +132,35 @@ example and when applying a substitution, functions are not affected.
 
 a. (rev2 (cons (app w y) z))|
    ((w (app b c)) (y (list a b)) (z (rev2 a)))
-   (rev2 (cons (app (app b c) (list a b)) (rev2 a)))
+   *(rev2 (cons (app (app b c) (list a b)) (rev2 a)))
    
 b. (cons 'c d)|
    ((c (cons a (list d))) (d (cons c nil)))
-   (cons 'c (cons c nil))
+   *(cons 'c (cons c nil))
    
 c. (or (endp u) (app u (cons w nil))))|
    ((u (list w)) (w (cons (first x) u)))
-   (or (endp (list w)) (app (list w) (cons (cons (first x) u) nil)))
+   *(or (endp (list w)) (app (list w) (cons (cons (first x) u) nil)))
 
 d. (* (* y (/ y (len z))) (+ (len z) y))|
    ((len (* y z)) (y (/ a b)))
-   (* (* (/ a b) (/ (/ a b) (len z))) (+ (len z) (/ a b)))
+   *(* (* (/ a b) (/ (/ a b) (len z))) (+ (len z) (/ a b)))
    
 e. (equal (+ (+ (len x) (len y)) (len 'z)) (len (cons z (app 'x y))))|
    ((x '(2 8)) (y '(5 6)) (z '(3)))
-   (equal (+ (+ (len '(2 8)) (len '(5 6))) (len 'z)) (len (cons '(3) (app 'x '(5 6)))))
+   *(equal (+ (+ (len '(2 8)) (len '(5 6))) (len 'z)) (len (cons '(3) (app 'x '(5 6)))))
    
 f. (cons u (app u w))|
    ((u (app w w))(w (app b a)) (w (list w)))
-   INVALID SUBSTITUTION. w is being replaced twice
+   *INVALID SUBSTITUTION. w is being replaced twice
    
 g. (app u w)|
    ((w (app u w)) (u w))
-   (app (w (app u w)))
+   *(app (w (app u w)))
    
 h. (cons u (f u w f))|
    ((u (cons a b))(f u)(w (app w u)))
-   (cons (cons a b) (f (cons a b) (app w u) u))
+   *(cons (cons a b) (f (cons a b) (app w u) u))
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Question 2: Finding a substitution, if it exists.
@@ -174,35 +174,35 @@ Again the * is just used to indicate the solution line.
 
 a. (app (list a) (rev2 b))
    (app (list (cons (list (first x)) x)) (rev2 (cons z (len2 (rest x)))))
-   ...............
+   *((a (cons (list (first x)) x))(b (cons z (len2 (rest x)))))
 
 b. (and (< (/ z w) (- x (+ x 2))) (> z x))
    (and (< (/ (unary-- (+ (- 5 6) 7)) x) (- (* x x) (+ (* x x) 2))) (> (unary-- (+ (- 5 6) 7)) (* x x)))
-   ...............
+   *((z (unary-- (+ (- 5 6) 7)))(w x)(x (* x x)))
 
 c. (app y z)
    (list 9 1)
-   ...............
+   *None - can't substitute a function call
  
 d. (app 'a (app b '(1 2 3)))
    (app x (app y '(1 2 3)))
-   ...............
+   *None - can't substitute a symbol
 
 e. (in x y)
    (in y (rev2 y)) 
-   ...............
+   *((x y)(y (rev2 y)))
   
 f. (app (list a b) b)
    (app (list c d) (first (cons d nil)))
-   ...............
+   *None - can't substitute b in two different ways in one substitution
   
 g. (app a (app (cons b c) c))
    (app '(1 2) (app (cons c (cons b c)) (cons b c)))
-   ...............
+   *((a '(1 2))(b c)(c (cons b c)))
    
 h. (cons y (app (list x)  y))
    (cons (- (expt 2 6) w) (app (list (- (expt 2 6) w)) (- (expt 2 6) q)))
-   ...............
+   *None - can't substitute y in two different ways in one substitution
 
 |#
 
