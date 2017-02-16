@@ -1,61 +1,3 @@
-; **************** BEGIN INITIALIZATION FOR ACL2s B MODE ****************** ;
-; (Nothing to see here!  Your actual file is after this initialization code);
-
-#|
-Pete Manolios
-Fri Jan 27 09:39:00 EST 2012
-----------------------------
-
-Made changes for spring 2012.
-
-
-Pete Manolios
-Thu Jan 27 18:53:33 EST 2011
-----------------------------
-
-The Beginner level is the next level after Bare Bones level.
-
-|#
-
-; Put CCG book first in order, since it seems this results in faster loading of this mode.
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem loading the CCG book.~%Please choose \"Recertify ACL2s system books\" under the ACL2s menu and retry after successful recertification.") (value :invisible))
-(include-book "ccg/ccg" :uncertified-okp nil :dir :acl2s-modes :ttags ((:ccg)) :load-compiled-file nil);v4.0 change
-
-;Common base theory for all modes.
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem loading ACL2s base theory book.~%Please choose \"Recertify ACL2s system books\" under the ACL2s menu and retry after successful recertification.") (value :invisible))
-(include-book "base-theory" :dir :acl2s-modes)
-
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem loading ACL2s customizations book.~%Please choose \"Recertify ACL2s system books\" under the ACL2s menu and retry after successful recertification.") (value :invisible))
-(include-book "custom" :dir :acl2s-modes :uncertified-okp nil :ttags :all)
-
-;Settings common to all ACL2s modes
-(acl2s-common-settings)
-
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem loading trace-star and evalable-ld-printing books.~%Please choose \"Recertify ACL2s system books\" under the ACL2s menu and retry after successful recertification.") (value :invisible))
-(include-book "trace-star" :uncertified-okp nil :dir :acl2s-modes :ttags ((:acl2s-interaction)) :load-compiled-file nil)
-(include-book "hacking/evalable-ld-printing" :uncertified-okp nil :dir :system :ttags ((:evalable-ld-printing)) :load-compiled-file nil)
-
-;theory for beginner mode
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem loading ACL2s beginner theory book.~%Please choose \"Recertify ACL2s system books\" under the ACL2s menu and retry after successful recertification.") (value :invisible))
-(include-book "beginner-theory" :dir :acl2s-modes :ttags :all)
-
-
-#+acl2s-startup (er-progn (assign fmt-error-msg "Problem setting up ACL2s Beginner mode.") (value :invisible))
-;Settings specific to ACL2s Beginner mode.
-(acl2s-beginner-settings)
-
-; why why why why 
-(acl2::xdoc acl2s::defunc) ; almost 3 seconds
-
-(cw "~@0Beginner mode loaded.~%~@1"
-    #+acl2s-startup "${NoMoReSnIp}$~%" #-acl2s-startup ""
-    #+acl2s-startup "${SnIpMeHeRe}$~%" #-acl2s-startup "")
-
-
-(acl2::in-package "ACL2S B")
-
-; ***************** END INITIALIZATION FOR ACL2s B MODE ******************* ;
-;$ACL2s-SMode$;Beginner
 #|
 CS 2800 Homework 5 - Spring 2017
 ;; <<@PREAMBLE>>
@@ -421,39 +363,74 @@ have to perform contract completion first!
 8. The length of the list obtained by appending x and y is 
    equal to the length of x plus the length of y.
 
-...............
+(implies (and (listp x) (listp y))
+         (equal (len (app x y)) (+ (len x) (len y))))
+         
+This conjecture is valid.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION9>>
 9. Reversing a list three times gives back the original list.
 
-...............
+(implies (listp x)
+         (equal (rev (rev (rev x))) x))
+         
+This conjecture is invalid. Counterexample: if x = '(1 2) 
+                                               (rev (rev (rev x))) = '(2 1) 
+                                               '(1 2) ~= '(2 1)
+
+To fix this, the value of N in the following sentence must be even:
+"Reversing a list N times gives back the original list"
+
+For a value of N = 2, this would be formalized as follows:
+
+(implies (listp x)
+         (equal (rev (rev x)) x))
+         
+Which would hold true.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION10>>
 10. If a is in (use the function in2) the append of x y and a is
     not in x, then a is in y.
 
-...............
+(implies (and (listp x) (listp y) (in2 a (app x y) (not (in2 a x))))
+         (in2 a y))
+         
+This conjecture is valid.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION11>>
 11. If a is in (use in2) the append of x y and a is in x, then a is
     not in y.
 
-...............
+(implies (and (listp x) (listp y) (in2 a (app x y)) (in2 a x))
+         (not (in a y)))
+         
+This conjecture is invalid. Counterexample: if a = 1, x = '(1) and y = '(1)
+                                               a is in x and also in y
+                                             
+The simplest way to fix this is to turn it into question 10, as you cannot
+draw any interesting conclusions about y or (app x y) just by knowing that a is in x.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION12>>
 12. The comb-len of x and x is x*x.
 
-...............
+(implies (listp x)
+         (equal (comb-len x x) (* x x)))
+         
+This conjecture is valid
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION13>>
 13. The comb-len of x and y is the same as the comb-len of y and x.
 
-...............
+(implies (and (listp x) (listp y))
+         (equal (comb-len x y) (comb-len y x)))
+         
+This conjecture is valid.
+This conjecture is literally just the commutative property of multiplication.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION14>>
@@ -461,15 +438,36 @@ have to perform contract completion first!
     iff the length of x is equal to the length of a and the
     length of y is equal to the length of b.
 
-...............
+(implies (and (listp x) (listp y) (listp a) (listp b) (equal (len2 x) (len2 a)) (equal (len2 y) (len2 b)))
+         (equal (comb-len x y) (comb-len a b)))
+         
+This conjecture is valid - it essentially tests whether multiplication is deterministic or not, which it is.
+(what I mean by this is that multiplication always returns the same result regardless of what you call
+your variables, if the values of the variables are the same)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION15>>
 15. If a is in (use in2) l and b is in l and c is in l, then the
     length of l is greater than or equal to 3.
 
-...............
+(implies (and (listp l) (in a l) (in b l) (in c l))
+         (>= (len2 l) 3))
+         
+This conjecture is invalid. Counterexample: if a = 1, b = 1, c = 1, l = '(1)
+                                            a, b, and c are all in l, but (len l) is 1
+                                            1 ~>= 3
+                                            
+To fix this, we need to verify that a, b, and c are all distinct from one another, and
+we get the following sentence:
 
+If a is in (use in2) l and b is in l and c is in l, and a, b, and c are all unique, 
+then the length of l is greater than or equal to 3.
+
+This would be formalized as:
+
+(implies (and (listp l) (in a l) (in b l) (in c l) (not (or (equal a b) (equal b c) (equal a c))))
+         (>= (len2 l) 3))
+         
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION16>>
 16. Suppose 1 is in (use in2) x and 2 is in x. Also, suppose
@@ -478,7 +476,25 @@ have to perform contract completion first!
     differs from 3 and 4, it is not in y. Then the comb-len of x
     and y is 4.
 
-...............
+(implies (and (listp x) (listp y) (in 1 x) (in 2 x) (in 3 y) (in 4 y)
+              (if (not (or (equal a 1) (equal a 2))) (not (in a x)) t)
+              (if (not (or (equal b 3) (equal b 4))) (not (in b y)) t))
+         (equal (comb-len x y) 4))
+         
+This conjecture is invalid. Counterexample: x = '(1 1 2) , y = '(3 4)
+                                            (comb-len x y) = 6
+                                            6 ~= 4
+                                         
+Since I can't really see what the point of this function/conjecture even is,
+I can't really "fix" it per se. To make it valid, we could add another
+stipulation that x and y are both length 2, but that really turns the whole
+thing into a self-fulfilling prophecy (2*2 = 4, huh, no kidding). But here goes:
+
+(implies (and (listp x) (listp y) (in 1 x) (in 2 x) (in 3 y) (in 4 y)
+              (equal (len2 x) 2) (equal (len2 y) 2)
+              (if (not (or (equal a 1) (equal a 2))) (not (in a x)) t)
+              (if (not (or (equal b 3) (equal b 4))) (not (in b y)) t))
+         (equal (comb-len x y) 4))
 
 |#
 
@@ -515,7 +531,7 @@ give everyone who claims to have filled out the questionnaire points.
 The following team members filled out the feedback survey provided in 
 the link above:
 ---------------------------------------------
-<firstname> <LastName>
-<firstname> <LastName>
+Izaak Branch
+Chris Kenyon
 
 |#
