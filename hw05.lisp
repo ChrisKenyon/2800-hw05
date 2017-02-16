@@ -293,7 +293,7 @@ For each of the conjectures in questions 3-7:
  C1. (listp n)
  C2. (equal m nil)
  -------
- C3. (endp m) {C2}
+ C3. (endp m) {C2, def. endp}
  
  (comb-len m n)
  { def. comb-len, if axioms, C3}
@@ -367,7 +367,7 @@ C2. (listp (rest l))
 C3. (in2 a (rest l))
 C4. (in2 a (duplicate (rest l)))
 -----------
-C5. (not (endp l)) {C2, rest axioms}
+C5. (not (endp l)) {C2, def. endp, rest axioms}
 
 (in2 a (duplicate l))
 = {def. duplicate, C5, if axioms}
