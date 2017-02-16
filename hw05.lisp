@@ -231,7 +231,9 @@ in infix notation (ex a =>(B/\C)).
   :input-contract (listp l)
   :output-contract (booleanp (endp l))
   (if (consp l) nil t))
-  
+
+|#
+
 (defunc len2 (x)
   :input-contract (listp x)
   :output-contract (natp (len2 x))
@@ -258,8 +260,9 @@ in infix notation (ex a =>(B/\C)).
   :output-contract (natp (comb-len m n))
   (if (endp m) 
       0
-    (+ (len2 n) (comb-len (rest m) n))))
+    (+ (len2 n) (comb-len (rest m) n))))#|ACL2s-ToDo-Line|#
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -285,29 +288,71 @@ For each of the conjectures in questions 3-7:
 3.  (implies (and (listp n) (equal m nil))
              (equal (comb-len m n) 0))
 
+             
+ 
+ C1. (listp n)
+ C2. (equal m nil)
+ -------
+ C3. (endp m) {C2}
+ 
+ (comb-len m n)
+ { def. comb-len, if axioms, C3}
+ 0
+ Q.E.D
 
-...............................
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION4>>
 4.  (implies (in2 x l)
              (in2 x (cons a l)))
-.................
+Contract checking: add (listp l)
+C1. (listp l)
+C2. (in2 x l)
 
+(in2 x (cons a l))
+= {def. in2|((a x)(l (cons a l))),if axioms}
+(or (equal x (first (cons a l))) (in2 x (rest (cons a l))))
+= {first-rest axioms, cons axioms}
+(or (equal x a) (in2 x l))
+={C2}
+T
+Q.E.D.
+
+             
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION5>>
 5. (implies (listp l)
             (> (len2 (duplicate l)) (len2 l)))
 
-...............
+ C1. (listp l)
+ 
+ FALSIFIABLE. ((l '())
+ 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION6>>
 6. (implies (equal (comb-len (rest m) n) x)
             (equal (comb-len m n)
                    (+ x (len2 m))))
+CC: Add (listp m), (consp (rest m)), (listp n), (rationalp x) 
+ C1. (listp m)
+ C2. (consp (rest m))
+ C3. (listp n)
+ C4. (rationalp x)
+ C5. (equal (comb-len (rest m) n) x)
+ 
+ 
+FALSIFIABLE
 
-...............
+Subst.
+ ((m (cons 1 '()))(n (list 1 2 3 4 5)))
+
+Proven
+ (comb-len (rest m) n) = 0, x = 0
+ (comb-len m n) = 5
+ (+ x (len2 m)) = 1
+ 5 =/= 1
+ 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; <<@QUESTION7>>
@@ -315,8 +360,31 @@ For each of the conjectures in questions 3-7:
                    (in2 a (duplicate (rest l))))
             (equal (in2 a l)
                    (in2 a (duplicate l))))
+                   
+CC: Add (listp l), (listp (rest l))
+C1. (listp l)
+C2. (listp (rest l))
+C3. (in2 a (rest l))
+C4. (in2 a (duplicate (rest l)))
+-----------
+C5. (not (endp l)) {C2, rest axioms}
 
-...............
+(in2 a (duplicate l))
+= {def. duplicate, C5, if axioms}
+(in2 a (cons (first l) (cons (first l) (duplicate (rest l)))))
+= {def. in2|((l (cons (first l) (cons (first l) (duplicate (rest l)))))), C5, if axioms}
+(or (equal a (first (cons (first l) (cons (first l) (duplicate (rest l))))))
+    (in2 a (rest (cons (first l) (cons (first l) (duplicate (rest l)))))))
+={first-rest axioms, cons axioms}
+(or (equal a (first l)) (in2 a (cons (first l) (duplicate (rest l)))))
+= {def in2|((l (cons (first l) (duplicate (rest l))))), C5, if axioms}
+(or (equal a (first l)) (or (equal a (first (cons (first l) (duplicate (rest l)))))
+                            (in2 a (rest (cons (first l) (duplicate (rest l)))))))
+= {first-rest axioms, prop logic}
+(or (equal a (first l)) (equal a (first l)) (in2 a (duplicate (rest l))))
+={C4, prop logic}
+T
+Q.E.D.
 
 |#
 
